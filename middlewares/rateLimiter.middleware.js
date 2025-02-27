@@ -1,24 +1,30 @@
+import redis from 'redis';
+import { promisify } from 'util';
 
-const REQUEST_LIMIT = 10;
-const WINDOW_SIZE = 60000;
-const rateLimit = {};
+const client = redis.createClient();
+const getAsync = promisify(client.get).bind(client);
+const setAsync = promisify(client.set).bind(client);
 
-const rateLimiter = (req, res, next) => {
-  const ip = req.ip;
-  const currentTime = Date.now();
+const RATE_LIMIT = 10; // 10 requests per minute
+const WINDOW_SIZE = 60 * 1000; // 1 minute
 
-  if (!rateLimit[ip]) {
-    rateLimit[ip] = [];
-  }
+const rateLimiter = async (req, res, next) => {
+    const ip = req.ip;
+    const currentTime = Date.now();
 
-  rateLimit[ip] = rateLimit[ip].filter(timestamp => currentTime - timestamp < WINDOW_SIZE);
+    let requestLog = await getAsync(ip);
+    requestLog = requestLog ? JSON.parse(requestLog) : [];
 
-  if (rateLimit[ip].length >= REQUEST_LIMIT) {
-    return res.status(429).json({ message: 'There Too many requests, please try again later...' });
-  }
+    requestLog = requestLog.filter(timestamp => currentTime - timestamp < WINDOW_SIZE);
+    
+    if (requestLog.length >= RATE_LIMIT) {
+        return res.status(429).json({ message: 'Too many requests, please try again later.' });
+    }
 
-  rateLimit[ip].push(currentTime);
-  next();
+    requestLog.push(currentTime);
+    await setAsync(ip, JSON.stringify(requestLog));
+
+    next();
 };
 
 export default rateLimiter;
