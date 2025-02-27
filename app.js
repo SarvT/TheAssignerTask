@@ -1,5 +1,6 @@
 import express from "express";
-import { router as menuRouter } from "./routes/menu.route.js";
+import { router as userRoutes } from "./routes/userRoutes.js";
+import { router as authRoutes } from "./routes/authRoutes.js";
 
 const app = express();
 
@@ -14,9 +15,11 @@ app.use(
     limit: "16kb",
   })
 );
-app.use("/menu", menuRouter);
+
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Welcome to Menu!");
+  res.send("Welcome!");
 });
 export { app };
