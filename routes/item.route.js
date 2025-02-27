@@ -1,0 +1,8 @@
+import express from "express";
+import getItems from "../controllers/item.controller.js";
+
+const router = express.Router();
+
+router.get("/items", getItems);
+
+export { router };
