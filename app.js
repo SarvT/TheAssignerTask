@@ -1,5 +1,5 @@
 import express from "express";
-import { router as itemsRoutes } from "./routes/userRoutes.js";
+import { router as uploadRoutes } from "./routes/uploadRoutes.js";
 
 const app = express();
 
@@ -14,7 +14,7 @@ app.use(
     limit: "16kb",
   })
 );
-app.use("/api", itemsRoutes);
+app.use("/api", uploadRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome!");
