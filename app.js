@@ -1,6 +1,7 @@
 import express from "express";
 import { router as userRoutes } from "./routes/userRoutes.js";
 import { router as authRoutes } from "./routes/authRoutes.js";
+import rateLimiter from "./middlewares/rateLimiter.middleware.js";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(
   })
 );
 
+app.use(rateLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 
